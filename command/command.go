@@ -9,6 +9,7 @@ import (
 	common "github.com/chremoas/services-common/command"
 	"golang.org/x/net/context"
 	"strings"
+	"time"
 )
 
 type ClientFactory interface {
@@ -50,12 +51,16 @@ func (c *Command) Exec(ctx context.Context, req *proto.ExecRequest, rsp *proto.E
 }
 
 func getMessages(channelID string) {
+	longCtx, _ := context.WithTimeout(context.Background(), 60*time.Minute)
 	fmt.Printf("Calling GetMessages: ChannelID=%s\n", channelID)
 	discordClient := clientFactory.NewDiscordGateway()
-	messages, _ := discordClient.GetMessages(context.Background(), &discord.GetMessagesRequest{
+	messages, err := discordClient.GetMessages(longCtx, &discord.GetMessagesRequest{
 		ChannelID: channelID,
-		Limit: 100,
+		Limit:     100,
 	})
+	if (err != nil) {
+		fmt.Printf("Error: %s\n", err.Error())
+	}
 	fmt.Printf("messages: %+v\n", messages)
 }
 
