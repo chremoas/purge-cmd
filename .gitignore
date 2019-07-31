@@ -107,7 +107,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 ### Linux template
-*~
 
 # temporary files which can be created if a process still has a handle open of a deleted file
 .fuse_hidden*
@@ -121,3 +120,4 @@ Temporary Items
 # .nfs files are created when an open file is removed but is still being accessed
 .nfs*
 
+vendor/*
