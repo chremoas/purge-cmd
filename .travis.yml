@@ -1,0 +1,29 @@
+language: go
+sudo: required
+go:
+  - 1.14
+before_install:
+  - curl -fsSL https://get.docker.com | sh
+  - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
+  - mkdir -p $HOME/.docker
+  - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
+  - sudo service docker start
+install:
+  - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+  - docker buildx create --name xbuilder --use
+  - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+  - export GIT_TAG=$(cat VERSION)
+  - git config --global user.email "builds@travis-ci.com"
+  - git config --global user.name "Travis CI"
+  - git tag ${GIT_TAG} -a -m "Generated tag from TravisCI for build ${TRAVIS_BUILD_NUMBER}"
+  - git push -q https://${TAGPERM}@github.com/${TRAVIS_REPO_SLUG} -f --tags
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: make docker
+  on:
+    tags: false
+    branch: master
+branches:
+  except:
+    - /^v[0-9]/
